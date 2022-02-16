@@ -13,7 +13,8 @@ def get_results():
         else:
             input_path = image_name + str(i) + ".jpg"
         if input_path in os.listdir(path):
-            os.system("python3 /home/ec2-user/face_recognition.py " + path + input_path + " >> /home/ec2-user/output.txt") 
+            #print("/usr/bin/python3 /home/ec2-user/face_recognition.py " + path + input_path + " >> /home/ec2-user/output.txt")
+            os.system("/usr/bin/python3 /home/ec2-user/face_recognition.py " + path + input_path + " >> /home/ec2-user/output.txt") 
             # print(input_path)
         # print("$$$", input_path)
         
