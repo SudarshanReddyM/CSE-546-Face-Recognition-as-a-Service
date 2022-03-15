@@ -1,11 +1,8 @@
-from fileinput import filename
 from flask import Flask, render_template, request, redirect, url_for
 import json
 import boto3
-import boto
-from boto.sqs.message import Message
 from time import sleep
-import paramiko
+
 
 app = Flask(__name__)
 
