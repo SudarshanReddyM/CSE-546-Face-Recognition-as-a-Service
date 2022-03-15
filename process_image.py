@@ -1,11 +1,11 @@
 import boto3
-import boto.s3
-import boto
+# import boto.s3
+# import boto
 import json
 from sys import argv, exit
-from boto.s3.key import Key
-import boto.sqs
-from boto.sqs.message import Message
+# from boto.s3.key import Key
+# import boto.sqs
+# from boto.sqs.message import Message
 import os
 
 
@@ -15,8 +15,9 @@ class ProcessImage():
         self.s3_output_bucket_name="cse546group27outputbucket"
         self.sqs_queue_name = "CSE546_Group27_SQS"
         self.sqs_queue_url = 'https://queue.amazonaws.com/116117304770/CSE546_Group27_SQS'
-        self.download_folder_for_images = "/Users/dp/Desktop/StoreImages"
-        
+        # self.download_folder_for_images = "/Users/dp/Desktop/StoreImages"
+        self.download_folder_for_images = "/home/ec2-user/StoreImages"
+
     def fetch_image_from_sqs(self):
         sqs_service = boto3.resource("sqs")
         queue = sqs_service.get_queue_by_name(QueueName=self.sqs_queue_name)
@@ -52,8 +53,8 @@ class ProcessImage():
         image_processed_file = self.download_folder_for_images + "/" + file_name.split(".")[0] + ".txt"
         
         print("Processing the Image !!!")
-        # os.system("python3 ~/face_recognition.py " + downloaded_image + " > " + image_processed_file)
-        os.system("python3 /Users/dp/Desktop/face_recognition.py " + "> " + image_processed_file)
+        os.system("python3 /home/ec2-user/face_recognition.py " + downloaded_image + " > " + image_processed_file)
+        # os.system("python3 /Users/dp/Desktop/face_recognition.py " + "> " + image_processed_file)
         self.upload_result_to_s3(s3, image_processed_file, file_name)
         
     def download_image(self,s3_client, key_name):
