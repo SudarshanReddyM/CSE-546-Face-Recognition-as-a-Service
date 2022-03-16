@@ -132,8 +132,9 @@ class Controller():
                     print(f"Starting {no_of_new_instances_to_start} new instances")
                     self.start_instances(no_of_new_instances_to_start, ec2_client)
                 # Include sleep if necessary
-                print(f"Starting {stopped_instances} stopped instances")
-                ec2_client.instances.filter(InstanceIds=stopped_instances).start()
+                if len(stopped_instances) > 0:
+                    print(f"Starting {stopped_instances} stopped instances")
+                    ec2_client.instances.filter(InstanceIds=stopped_instances).start()
                 time.sleep(60)
                 
             else:
