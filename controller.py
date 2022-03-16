@@ -1,5 +1,5 @@
 import boto3
-from cv2 import threshold
+# from cv2 import threshold
 # import json
 import paramiko
 import threading
@@ -24,6 +24,7 @@ class Controller():
         
     def start_instances(self, no_of_instances, ec2_client):
         for i in range(no_of_instances):
+            ec2_client = boto3.client('ec2')
             start_instance = ec2_client.run_instances(
                 BlockDeviceMappings=self.ec2_instance_config(),
                 ImageId='ami-0417b03aea7f9fb32',
