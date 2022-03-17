@@ -93,6 +93,20 @@ class Controller():
         queue = sqs_client.get_queue_attributes(QueueUrl=self.sqs_queue_url, AttributeNames=['ApproximateNumberOfMessages',])
         return int(queue['Attributes']['ApproximateNumberOfMessages'])
     
+    def upload_to_s3_from_sqs_response(self):
+        s3_client = boto3.client("s3")
+        while True:
+            queue = self.sqs_service.get_queue_by_name(QueueName=self.sqs_response_queue_name)
+            messages = queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=20)
+            if messages:
+                for m in messages:
+                    content = json.loads(m.body)
+                    print("content var", content)
+                    print("content", list(content.values())[0])
+                    s3_client.put_object(Body=list(content.values())[0], Bucket=self.s3_output_bucket_name, Key=list(content.keys())[0].split(".")[0]+".txt")
+            else:
+                break
+            
     def process_image_in_ec2(self, ec2_client, instance_id):
         key = paramiko.RSAKey.from_private_key_file('/home/ec2-user/IAAS/CSE546_SSH_Access.pem') #pem file
         client = paramiko.SSHClient()
@@ -161,6 +175,7 @@ class Controller():
                 time.sleep(60)
             
             if self.get_queue_length(sqs_client) == 0:
+                self.upload_to_s3_from_sqs_response()
                 time.sleep(20)
             else:
                 time.sleep(30)
