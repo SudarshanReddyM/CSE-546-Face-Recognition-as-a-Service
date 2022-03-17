@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 import json
 import boto3
-from time import sleep
+import time
 
 
 app = Flask(__name__)
@@ -89,7 +89,7 @@ def upload_image():
     aws_object = UploadImage()
     file_name = ""
     for file in request.files.getlist('file'):
-        file_name = file.filename
+        file_name = file.filename.replace('.jpg', '.txt')
         if file.filename:
             aws_object.image_upload(file, file.filename)
     return redirect(url_for(f"fetch_output({file_name})"))
@@ -99,9 +99,15 @@ def fetch_output(file):
     aws_obj = UploadImage()
     # return aws_obj.retrieve_data_from_s3()
     boto3_client = boto3.client("s3")
-    obj = boto3_client.get_object(Bucket="cse546group27outputbucket",Key=file)
-    return obj["Body"].read().decode("utf-8")
-    
+    total_time = 0
+    while total_time < 600:
+        try:
+            obj = boto3_client.get_object(Bucket="cse546group27outputbucket",Key=file)
+            return obj["Body"].read().decode("utf-8")
+        except:
+            time.sleep(15)
+            total_time += 15
+            pass
 
 
 if __name__=="__main__":
