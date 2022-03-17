@@ -16,6 +16,7 @@ class ProcessImage():
         self.sqs_queue_name = "CSE546_Group27_SQS"
         self.sqs_queue_url = 'https://queue.amazonaws.com/116117304770/CSE546_Group27_SQS'
         self.sqs_response_queue = "https://sqs.us-east-1.amazonaws.com/116117304770/CSE546_Group27_Response_Queue"
+        self.sqs_response_queue_name = "CSE546_Group27_Response_Queue"
         # self.download_folder_for_images = "/Users/dp/Desktop/StoreImages"
         self.download_folder_for_images = "/home/ec2-user/StoreImages"
         self.sqs_service = boto3.resource("sqs")
@@ -94,7 +95,7 @@ class ProcessImage():
     
     def upload_to_sqs_from_s3(self, s3_client):
         s3_client = boto3.client("s3")
-        queue = self.sqs_service.get_queue_by_name(QueueName=self.sqs_response_queue)
+        queue = self.sqs_service.get_queue_by_name(QueueName=self.sqs_response_queue_name)
         messages = queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=20)
         if messages:
             for m in messages:
