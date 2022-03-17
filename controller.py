@@ -30,7 +30,7 @@ class Controller():
             ec2_client = boto3.client('ec2')
             start_instance = ec2_client.run_instances(
                 BlockDeviceMappings=self.ec2_instance_config(),
-                ImageId='ami-02937c846ad5d5317',
+                ImageId='ami-05d13c797af175601',
                 InstanceType='t2.micro',
                 KeyName='CSE546_SSH_Access', #key file name
                 MinCount=1,
