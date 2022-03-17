@@ -22,7 +22,7 @@ class Controller():
         self.list_of_threads = list()
         self.list_of_processing_instances = list()
         
-    def start_instances(self, no_of_instances, ec2_client):
+    def start_instances(self, no_of_instances):
         for i in range(no_of_instances):
             ec2_client = boto3.client('ec2')
             start_instance = ec2_client.run_instances(
@@ -111,9 +111,12 @@ class Controller():
                 sleep(10)
     
     def spin_up_instances(self):
-        boto3_session = boto3.Session()
-        ec2_client = boto3_session.resource("ec2")
-        sqs_client = boto3_session.client("sqs")
+        # boto3_session = boto3.Session()
+        # ec2_client = boto3_session.resource("ec2")
+        # sqs_client = boto3_session.client("sqs")
+        
+        ec2_client = boto3.resource("ec2")
+        sqs_client = boto3.client("sqs")
         max_instances = 19
         
         
@@ -130,7 +133,7 @@ class Controller():
                 no_of_new_instances_to_start = min(max_instances - (no_of_running_instances + no_of_stopped_instances), messages_in_queue - no_of_stopped_instances)
                 if no_of_new_instances_to_start > 0:
                     print(f"Starting {no_of_new_instances_to_start} new instances")
-                    self.start_instances(no_of_new_instances_to_start, ec2_client)
+                    self.start_instances(no_of_new_instances_to_start)
                 # Include sleep if necessary
                 if len(stopped_instances) > 0:
                     print(f"Starting {stopped_instances} stopped instances")
