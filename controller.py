@@ -159,6 +159,8 @@ class Controller():
             
             if self.get_queue_length(sqs_client) == 0:
                 time.sleep(20)
+            else:
+                time.sleep(30)
                 
     def execute_each_instance(self, ec2_client):
         for instance_id in self.get_list_of_running_instances(ec2_client):
