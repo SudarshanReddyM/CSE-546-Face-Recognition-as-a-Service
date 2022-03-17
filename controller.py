@@ -172,10 +172,14 @@ class Controller():
                 self.list_of_threads.append(thread)
                 self.list_of_processing_instances.append(instance_id)
                 thread.start()
+        new_thread_list = []
         for each_thread in self.list_of_threads:
             if not each_thread.is_alive():
                 self.list_of_processing_instances.remove(each_thread.getName())
-                self.list_of_threads.remove(each_thread)
+            else:
+                # self.list_of_threads.remove(each_thread)
+                new_thread_list.append(each_thread)
+        self.list_of_threads = new_thread_list
             
         
 if __name__=="__main__":
