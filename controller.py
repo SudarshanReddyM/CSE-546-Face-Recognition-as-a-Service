@@ -21,6 +21,7 @@ class Controller():
         self.sqs_queue_url = 'https://queue.amazonaws.com/116117304770/CSE546_Group27_SQS'
         self.sqs_service = boto3.resource("sqs")
         self.sqs_response_queue_name = "CSE546_Group27_Response_Queue"
+        self.s3_output_bucket_name="cse546group27outputbucket"
         self.list_of_threads = list()
         self.list_of_processing_instances = list()
         
