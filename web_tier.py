@@ -92,7 +92,7 @@ def upload_image():
         file_name = file.filename.replace('.jpg', '.txt')
         if file.filename:
             aws_object.image_upload(file, file.filename)
-    return redirect(url_for(f"fetch_output({file_name})"))
+    return redirect(f"/{file_name}")
 
 @app.route('/<file>', methods=["GET"])
 def fetch_output(file):
@@ -107,7 +107,8 @@ def fetch_output(file):
         except:
             time.sleep(15)
             total_time += 15
-            pass
+            # pass
+    return "Not Found"
 
 
 if __name__=="__main__":
