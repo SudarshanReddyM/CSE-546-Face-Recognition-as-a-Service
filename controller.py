@@ -168,7 +168,7 @@ class Controller():
                 self.list_of_processing_instances.append(instance_id)
                 thread.start()
         for each_thread in self.list_of_threads:
-            if each_thread.is_alive():
+            if not each_thread.is_alive():
                 self.list_of_processing_instances.remove(each_thread.getName())
                 self.list_of_threads.remove(each_thread)
             
