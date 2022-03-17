@@ -101,6 +101,7 @@ class Controller():
             if messages:
                 for m in messages:
                     content = json.loads(m.body)
+                    m.delete()
                     print("content var", content)
                     print("content", list(content.values())[0])
                     s3_client.put_object(Body=list(content.values())[0], Bucket=self.s3_output_bucket_name, Key=list(content.keys())[0].split(".")[0]+".txt")
