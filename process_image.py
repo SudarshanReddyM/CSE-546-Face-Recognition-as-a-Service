@@ -15,10 +15,11 @@ class ProcessImage():
         self.s3_output_bucket_name="cse546group27outputbucket"
         self.sqs_queue_name = "CSE546_Group27_SQS"
         self.sqs_queue_url = 'https://queue.amazonaws.com/116117304770/CSE546_Group27_SQS'
+        self.sqs_response_queue = "https://sqs.us-east-1.amazonaws.com/116117304770/CSE546_Group27_Response_Queue"
         # self.download_folder_for_images = "/Users/dp/Desktop/StoreImages"
         self.download_folder_for_images = "/home/ec2-user/StoreImages"
         self.sqs_service = boto3.resource("sqs")
-        
+        self.sqs_client = boto3.client("sqs")
     def fetch_image_from_sqs(self):
         # sqs_service = boto3.resource("sqs")
         queue = self.sqs_service.get_queue_by_name(QueueName=self.sqs_queue_name)
@@ -78,10 +79,19 @@ class ProcessImage():
             print("content of file  ", content)
         with open(file_path, "w") as f:
             f.write(file_name + ":" + content)
-        s3_client.upload_file(file_path, self.s3_output_bucket_name, file_name.split(".")[0] + ".txt")
-        print("File uploaded succesfully!!")
+        # s3_client.upload_file(file_path, self.s3_output_bucket_name, file_name.split(".")[0] + ".txt")
+        # print("File uploaded succesfully!!")
+        self.upload_result_to_sqs_response(file_path)
         
-
+    def upload_result_to_sqs_response(self, file_path):
+        
+        with open(file_path, "r") as f:
+            content = f.readline()
+            key, value = content.split(":")
+            message = {key : value}
+            response = self.sqs_client.send_message(QueueUrl=self.sqs_response_queue, MessageBody=json.dumps(message))
+            print("Message Upload to Response Queue", response)
+            
 if __name__=="__main__":
     process_image = ProcessImage()
     while True:
