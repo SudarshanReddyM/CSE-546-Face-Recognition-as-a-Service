@@ -40,11 +40,11 @@ class Controller():
                 ],
             )
             instance = start_instance["Instances"][0]
-        try:
-            ec2_client.create_tags(Resources=[instance["InstanceId"]], Tags=[{'Key':'Name', 'Value':'app_tier '+str(i)}])
-        except:
-            print("Not Tagged ! Instance might be terminated :", instance)
-        print(start_instance)
+            try:
+                ec2_client.create_tags(Resources=[instance["InstanceId"]], Tags=[{'Key':'Name', 'Value':'app_tier '+str(i)}])
+            except:
+                print("Not Tagged ! Instance might be terminated :", instance)
+            print(start_instance)
             
     def ec2_instance_config(self):
         config = [
