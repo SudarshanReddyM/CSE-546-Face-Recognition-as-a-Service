@@ -87,15 +87,20 @@ class UploadImage:
 @app.route('/upload-image', methods=['POST'])
 def upload_image():
     aws_object = UploadImage()
+    file_name = ""
     for file in request.files.getlist('file'):
+        file_name = file.filename
         if file.filename:
             aws_object.image_upload(file, file.filename)
-    return "Success POST Call!!"
+    return redirect(url_for(f"fetch_output({file_name})"))
 
-@app.route('/', methods=["GET"])
-def fetch_output():
+@app.route('/<file>', methods=["GET"])
+def fetch_output(file):
     aws_obj = UploadImage()
-    return aws_obj.retrieve_data_from_s3()
+    # return aws_obj.retrieve_data_from_s3()
+    boto3_client = boto3.client("s3")
+    obj = boto3_client.get_object(Bucket="cse546group27outputbucket",Key=file)
+    return obj["Body"].read().decode("utf-8")
     
 
 
