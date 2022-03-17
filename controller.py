@@ -127,7 +127,7 @@ class Controller():
             stopped_instances = self.get_list_of_stopped_instances(ec2_client)
             
             if messages_in_queue > no_of_stopped_instances:
-                no_of_new_instances_to_start = min(max_instances - no_of_stopped_instances, messages_in_queue)
+                no_of_new_instances_to_start = min(max_instances - (no_of_running_instances + no_of_stopped_instances), messages_in_queue - no_of_stopped_instances)
                 if no_of_new_instances_to_start > 0:
                     print(f"Starting {no_of_new_instances_to_start} new instances")
                     self.start_instances(no_of_new_instances_to_start, ec2_client)
@@ -152,7 +152,7 @@ class Controller():
                 if id not in self.list_of_processing_instances:
                     idle_instances.append(id)
             
-            if len(idle_instances):
+            if len(idle_instances) > 0:
                 print("Stopping Idle Instances: ", idle_instances)
                 ec2_client.instances.filter(InstanceIds=idle_instances).stop()
                 time.sleep(45)
