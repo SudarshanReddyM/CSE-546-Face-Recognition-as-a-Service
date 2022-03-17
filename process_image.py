@@ -17,13 +17,15 @@ class ProcessImage():
         self.sqs_queue_url = 'https://queue.amazonaws.com/116117304770/CSE546_Group27_SQS'
         # self.download_folder_for_images = "/Users/dp/Desktop/StoreImages"
         self.download_folder_for_images = "/home/ec2-user/StoreImages"
-
+        self.sqs_service = boto3.resource("sqs")
+        
     def fetch_image_from_sqs(self):
-        sqs_service = boto3.resource("sqs")
-        queue = sqs_service.get_queue_by_name(QueueName=self.sqs_queue_name)
+        # sqs_service = boto3.resource("sqs")
+        queue = self.sqs_service.get_queue_by_name(QueueName=self.sqs_queue_name)
         messages = queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=20)
         # print("Messages:  ")
         # print(messages)
+        content = ['no_message']
         if messages:
             for each_message in messages:
                 # print(each_message)
@@ -32,17 +34,24 @@ class ProcessImage():
                 each_message.delete()
                 # print("Message deleted")
                 # print("Content:", content)
-                tag = content[0]
-                if tag == "process":
-                    s3_bucket_name = content[1]
-                    file_name = content[4]
-                    print(s3_bucket_name, file_name)
-                    execution = self.process_image(s3_bucket_name, file_name)
-                    if execution:
-                        print("Message Processed !!")
+                # tag = content[0]
+                # if tag == "process":
+                #     s3_bucket_name = content[1]
+                #     file_name = content[4]
+                #     print(s3_bucket_name, file_name)
+                #     execution = self.process_image(s3_bucket_name, file_name)
+                #     if execution:
+                #         print("Message Processed !!")
         else:
             print("No messages in Queue")
-        return
+        return content
+    
+    def send_image_for_processing(self, content):
+        # if content[0] == "process":
+        print(content[1], content[4])
+        execution = self.process_image(content[1], content[4])
+        if execution:
+            print("Message Processed")
     
     def process_image(self,s3_bucket_name, file_name):
         # file_name_and_extension = file_name.split(".")
@@ -75,4 +84,9 @@ class ProcessImage():
 
 if __name__=="__main__":
     process_image = ProcessImage()
-    process_image.fetch_image_from_sqs()
+    while True:
+        content = process_image.fetch_image_from_sqs()
+        if content[0] == "process":
+            process_image.send_image_for_processing(content)
+        else:
+            break

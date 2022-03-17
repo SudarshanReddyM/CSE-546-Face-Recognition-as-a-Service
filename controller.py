@@ -138,7 +138,7 @@ class Controller():
                 if len(stopped_instances) > 0:
                     print(f"Starting {stopped_instances} stopped instances")
                     ec2_client.instances.filter(InstanceIds=stopped_instances).start()
-                time.sleep(60)
+                time.sleep(75)
                 
             else:
                 no_of_instances_to_start = min(no_of_stopped_instances, messages_in_queue - (no_of_running_instances - len(self.list_of_processing_instances)))
@@ -158,7 +158,7 @@ class Controller():
             if len(idle_instances) > 0:
                 print("Stopping Idle Instances: ", idle_instances)
                 ec2_client.instances.filter(InstanceIds=idle_instances).stop()
-                time.sleep(45)
+                time.sleep(60)
             
             if self.get_queue_length(sqs_client) == 0:
                 time.sleep(20)
