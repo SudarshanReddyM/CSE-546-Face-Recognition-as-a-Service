@@ -6,6 +6,9 @@ import time
 
 app = Flask(__name__)
 
+boto3_client = boto3.client("s3")
+
+
 class UploadImage:
     def __init__(self) -> None:
         # Please provide your aws region where s3 bucket and SQS are created.
@@ -92,23 +95,22 @@ def upload_image():
         file_name = file.filename.replace('.jpg', '.txt')
         if file.filename:
             aws_object.image_upload(file, file.filename)
-    return redirect(f"/{file_name}")
+    # return redirect(f"/{file_name}")
+    return "File Uploaded!"
 
 @app.route('/<file>', methods=["GET"])
 def fetch_output(file):
     aws_obj = UploadImage()
     # return aws_obj.retrieve_data_from_s3()
-    boto3_client = boto3.client("s3")
-    total_time = 0
-    while total_time < 600:
-        try:
-            obj = boto3_client.get_object(Bucket="cse546group27outputbucket",Key=file)
-            return obj["Body"].read().decode("utf-8")
-        except:
-            time.sleep(15)
-            total_time += 15
-            # pass
-    return "Not Found"
+    # boto3_client = boto3.client("s3")
+    # total_time = 0
+    # while total_time < 600:
+    global boto3_client
+    try:
+        obj = boto3_client.get_object(Bucket="cse546group27outputbucket",Key=file)
+        return obj["Body"].read().decode("utf-8")
+    except:
+        return "Not Found"
 
 
 if __name__=="__main__":
