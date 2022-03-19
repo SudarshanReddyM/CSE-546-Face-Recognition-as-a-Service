@@ -1,17 +1,9 @@
 import boto3
-# from cv2 import threshold
 import json
 import paramiko
 import threading
-# from boto.s3.key import Key
-# from boto.sqs.message import Message
 from time import sleep
-# import boto.s3
-# import boto.sqs
-# from sys import argv, exit
 import time
-# import os
-# import boto
 
 class Controller():
     def __init__(self):
@@ -32,7 +24,7 @@ class Controller():
                 BlockDeviceMappings=self.ec2_instance_config(),
                 ImageId='ami-05d13c797af175601',
                 InstanceType='t2.micro',
-                KeyName='CSE546_SSH_Access', #key file name
+                KeyName='CSE546_SSH_Access',
                 MinCount=1,
                 MaxCount=1,
                 Monitoring={
@@ -112,7 +104,7 @@ class Controller():
                 break
             
     def process_image_in_ec2(self, ec2_client, instance_id):
-        key = paramiko.RSAKey.from_private_key_file('/home/ec2-user/IAAS/CSE546_SSH_Access.pem') #pem file
+        key = paramiko.RSAKey.from_private_key_file('/home/ec2-user/IAAS/CSE546_SSH_Access.pem')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         instance = [i for i in ec2_client.instances.filter(InstanceIds=[instance_id])][0]
@@ -129,10 +121,6 @@ class Controller():
                 sleep(10)
     
     def spin_up_instances(self):
-        # boto3_session = boto3.Session()
-        # ec2_client = boto3_session.resource("ec2")
-        # sqs_client = boto3_session.client("sqs")
-        
         ec2_client = boto3.resource("ec2")
         sqs_client = boto3.client("sqs")
         max_instances = 19
@@ -152,7 +140,6 @@ class Controller():
                 if no_of_new_instances_to_start > 0:
                     print(f"Starting {no_of_new_instances_to_start} new instances")
                     self.start_instances(no_of_new_instances_to_start)
-                # Include sleep if necessary
                 if len(stopped_instances) > 0:
                     print(f"Starting {stopped_instances} stopped instances")
                     ec2_client.instances.filter(InstanceIds=stopped_instances).start()
@@ -167,7 +154,6 @@ class Controller():
             
             self.execute_each_instance(ec2_client)
             
-            # idle_instances = [id for id in  s elf.get_list_of_running_instances(ec2_client) if id]
             idle_instances = list()
             for id in self.get_list_of_running_instances(ec2_client):
                 if id not in self.list_of_processing_instances:
@@ -196,7 +182,6 @@ class Controller():
             if not each_thread.is_alive():
                 self.list_of_processing_instances.remove(each_thread.getName())
             else:
-                # self.list_of_threads.remove(each_thread)
                 new_thread_list.append(each_thread)
         self.list_of_threads = new_thread_list
             
@@ -204,4 +189,3 @@ class Controller():
 if __name__=="__main__":
     controller = Controller()
     controller.spin_up_instances()
-     

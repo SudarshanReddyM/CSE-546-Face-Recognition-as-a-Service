@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, request, redirect
 import json
 import boto3
 import time
 
 
 app = Flask(__name__)
-
 boto3_client = boto3.client("s3")
 
 
@@ -25,30 +24,10 @@ class UploadImage:
     
     def image_upload(self, file, file_name):
         boto3_session =  boto3.Session()
-        
         s3 = boto3_session.client("s3")
         self.upload_image_to_s3(s3, file, file_name)
-        
-        # all_buckets = s3.list_buckets()
-        # s3.upload_fileobj(file, self.s3_input_bucket_name, str(file_name))
-        # print("Image uploaded to S3")
         sqs = boto3_session.client("sqs")
         self.upload_message_to_sqs_queue(sqs, file_name)
-        # all_queues = sqs.list_queues()
-    #     message_attributes = {
-    #     'Title': {
-    #         'DataType': 'String',
-    #         'StringValue': 'Image Name'
-    #     },
-    #     'Author': {
-    #         'DataType': 'String',
-    #         'StringValue': 'Sudarshan Darshin Koushik'
-    #     }
-    # }
-    #     message_body = json.dumps(["process", self.s3_input_bucket_name, "", "", file_name])
-    #     sqs.send_message(QueueUrl=self.sqs_queue_url, MessageAttributes=message_attributes, MessageBody=message_body)
-        
-    #     print("Message Uploaded to Queue")
         return "Success"
     
     def upload_image_to_s3(self, s3_client, file, file_name):
@@ -66,10 +45,9 @@ class UploadImage:
             'DataType': 'String',
             'StringValue': 'Sudarshan Darshin Koushik'
         }
-    }
+        }
         message_body = json.dumps(["process", self.s3_input_bucket_name, "", "", file_name])
         sqs_client.send_message(QueueUrl=self.sqs_queue_url, MessageAttributes=message_attributes, MessageBody=message_body)
-        
         print("Message Uploaded to Queue")
         return
     
@@ -92,20 +70,16 @@ def upload_image():
     aws_object = UploadImage()
     file_name = ""
     for file in request.files.getlist('file'):
-        file_name = file.filename.replace('.jpg', '.txt')
+        file_name = file.filename
         if file.filename:
             aws_object.image_upload(file, file.filename)
-    # return redirect(f"/{file_name}")
     return "File Uploaded!"
+    #return redirect(f"/{file_name}")
 
 @app.route('/<file>', methods=["GET"])
 def fetch_output(file):
-    aws_obj = UploadImage()
-    # return aws_obj.retrieve_data_from_s3()
-    # boto3_client = boto3.client("s3")
-    # total_time = 0
-    # while total_time < 600:
     global boto3_client
+    #time.sleep(400)
     try:
         obj = boto3_client.get_object(Bucket="cse546group27outputbucket",Key=file)
         return obj["Body"].read().decode("utf-8")
@@ -114,5 +88,4 @@ def fetch_output(file):
 
 
 if __name__=="__main__":
-    # app.run(debug=True)
     app.run(host='0.0.0.0',port=5000, debug=True)
