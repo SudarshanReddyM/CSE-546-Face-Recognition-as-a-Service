@@ -1,7 +1,7 @@
 import boto3
 import json
 import os
-
+import base64
 
 class ProcessImage():
     def __init__(self):
@@ -26,16 +26,26 @@ class ProcessImage():
             print("No messages in Queue")
         return content
     
-    def send_image_for_processing(self, content):
-        print(content[1], content[4])
-        execution = self.process_image(content[1], content[4])
-        if execution:
-            print("Message Processed")
+    def fetch_image_image_from_sqs(self,content):
+        with open(self.download_folder_for_images+"/" + content[4], "wb") as file_to_save:
+            msg1 = content[2].encode('utf-8')
+            # print("$$$$$$",str(msg1)[1:])
+            decode_image = base64.decodebytes(msg1)
+            # print()
+            # print(decode_image)
+            file_to_save.write(decode_image)
+        self.process_image(content[4])
     
-    def process_image(self,s3_bucket_name, file_name):
+    # def send_image_for_processing(self, content):
+    #     print(content[1], content[4])
+    #     execution = self.process_image(content[1], content[4])
+    #     if execution:
+    #         print("Message Processed")
+    
+    def process_image(self, file_name):
         boto3_session =  boto3.Session()
         s3 = boto3_session.client("s3")
-        self.download_image(s3, file_name)
+        # self.download_image(s3, file_name)
         downloaded_image = self.download_folder_for_images + "/" + file_name
         image_processed_file = self.download_folder_for_images + "/" + file_name.split(".")[0] + ".txt"
         
@@ -74,6 +84,6 @@ if __name__=="__main__":
     while True:
         content = process_image.fetch_image_from_sqs()
         if content[0] == "process":
-            process_image.send_image_for_processing(content)
+            process_image.fetch_image_image_from_sqs(content)
         else:
             break

@@ -2,6 +2,7 @@ from flask import Flask, request, redirect
 import json
 import boto3
 import time
+import base64
 
 
 app = Flask(__name__)
@@ -26,16 +27,24 @@ class UploadImage:
         boto3_session =  boto3.Session()
         s3 = boto3_session.client("s3")
         self.upload_image_to_s3(s3, file, file_name)
+        
         sqs = boto3_session.client("sqs")
-        self.upload_message_to_sqs_queue(sqs, file_name)
+        self.upload_message_to_sqs_queue(self.encode_image(file), sqs, file_name)
         return "Success"
+    
+    def encode_image(self, image):
+        with open(image, 'rb') as binary:
+            binary_data = binary.read()
+            encoded = base64.b64encode(binary_data)
+            msg = encoded.decode('utf-8')
+        return msg
     
     def upload_image_to_s3(self, s3_client, file, file_name):
         s3_client.upload_fileobj(file, self.s3_input_bucket_name, str(file_name))
         print("Image uploaded to S3")
         return
     
-    def upload_message_to_sqs_queue(self, sqs_client, file_name):
+    def upload_message_to_sqs_queue(self, encoded_bytes, sqs_client, file_name):
         message_attributes = {
         'Title': {
             'DataType': 'String',
@@ -46,7 +55,7 @@ class UploadImage:
             'StringValue': 'Sudarshan Darshin Koushik'
         }
         }
-        message_body = json.dumps(["process", self.s3_input_bucket_name, "", "", file_name])
+        message_body = json.dumps(["process", self.s3_input_bucket_name, encoded_bytes, "", file_name])
         sqs_client.send_message(QueueUrl=self.sqs_queue_url, MessageAttributes=message_attributes, MessageBody=message_body)
         print("Message Uploaded to Queue")
         return
