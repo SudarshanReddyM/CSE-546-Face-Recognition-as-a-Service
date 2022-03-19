@@ -34,6 +34,7 @@ class ProcessImage():
             # print()
             # print(decode_image)
             file_to_save.write(decode_image)
+        self.image_upload(self.download_folder_for_images+"/" + content[4], content[4])
         self.process_image(content[4])
     
     # def send_image_for_processing(self, content):
@@ -41,6 +42,20 @@ class ProcessImage():
     #     execution = self.process_image(content[1], content[4])
     #     if execution:
     #         print("Message Processed")
+    
+    def image_upload(self, file, file_name):
+        boto3_session =  boto3.Session()
+        s3 = boto3_session.client("s3")
+        self.upload_image_to_s3(s3, file, file_name)
+        
+        # sqs = boto3_session.client("sqs")
+        # self.upload_message_to_sqs_queue(self.encode_image(file), sqs, file_name)
+        return "Success"
+    
+    def upload_image_to_s3(self, s3_client, file, file_name):
+        s3_client.upload_fileobj(file, self.s3_input_bucket_name, str(file_name))
+        print("Image uploaded to S3")
+        return
     
     def process_image(self, file_name):
         boto3_session =  boto3.Session()
